@@ -1,0 +1,26 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "FarmaMap (Debug)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": [
+                "--dart-define=SUPABASE_URL=your_url",
+                "--dart-define=SUPABASE_ANON_KEY=your_key"
+            ]
+        },
+        {
+            "name": "FarmaMap (Release)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "flutterMode": "release",
+            "args": [
+                "--dart-define=SUPABASE_URL=your_url",
+                "--dart-define=SUPABASE_ANON_KEY=your_key"
+            ]
+        }
+    ]
+}
