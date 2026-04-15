@@ -1,0 +1,26 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "FarmaMap (Debug)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": [
+                "--dart-define=SUPABASE_URL=https://orzkzuqfybihvnbpnnke.supabase.co",
+                "--dart-define=SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yemt6dXFmeWJpaHZuYnBubmtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMjYyMzgsImV4cCI6MjA5MTcwMjIzOH0.GXnTbkFaqgvYqPpL_-JlHYSWvva6wfT0Bxadze2qrp4"
+            ]
+        },
+        {
+            "name": "FarmaMap (Release)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "flutterMode": "release",
+            "args": [
+                "--dart-define=SUPABASE_URL=https://orzkzuqfybihvnbpnnke.supabase.co",
+                "--dart-define=SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yemt6dXFmeWJpaHZuYnBubmtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMjYyMzgsImV4cCI6MjA5MTcwMjIzOH0.GXnTbkFaqgvYqPpL_-JlHYSWvva6wfT0Bxadze2qrp4"
+            ]
+        }
+    ]
+}
