@@ -10,6 +10,7 @@ import '../../core/extensions/context_extensions.dart';
 import '../../core/extensions/num_extensions.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/models/farmacia.dart';
+import '../../data/services/osrm_service.dart';
 import '../providers/auth_provider.dart';
 import '../providers/farmacias_provider.dart';
 import '../providers/location_provider.dart';
@@ -31,6 +32,8 @@ class MapScreen extends ConsumerStatefulWidget {
 class _MapScreenState extends ConsumerState<MapScreen> {
   late final MapController _mapController;
   Farmacia? _selectedFarmacia;
+  List<LatLng> _currentRoute = [];
+  final OsrmService _osrmService = OsrmService();
 
   @override
   void initState() {
@@ -56,7 +59,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     }
   }
 
-  void _onMarkerTap(Farmacia farmacia) {
+  void _onMarkerTap(Farmacia farmacia) async {
     setState(() => _selectedFarmacia = farmacia);
 
     final userPos = ref.read(currentPositionProvider);
@@ -68,6 +71,16 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         farmacia.lat,
         farmacia.lng,
       );
+
+      // Descargamos la ruta en el hilo de fondo
+      _osrmService.getRoute(
+        LatLng(userPos.latitude, userPos.longitude),
+        LatLng(farmacia.lat, farmacia.lng),
+      ).then((route) {
+        if (mounted && _selectedFarmacia?.id == farmacia.id) {
+          setState(() => _currentRoute = route);
+        }
+      });
     }
 
     FarmaciaBottomSheet.show(
@@ -83,7 +96,12 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         _openDirections(farmacia);
       },
     ).then((_) {
-      setState(() => _selectedFarmacia = null);
+      if (mounted) {
+        setState(() {
+          _selectedFarmacia = null;
+          _currentRoute = [];
+        });
+      }
     });
   }
 
@@ -244,7 +262,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         onTap: (tapPosition, point) {
           // Deseleccionar farmacia si se toca en una zona vacía del mapa
           if (_selectedFarmacia != null) {
-            setState(() => _selectedFarmacia = null);
+            setState(() {
+              _selectedFarmacia = null;
+              _currentRoute = [];
+            });
           }
         },
         onLongPress: (tapPosition, point) {
@@ -310,6 +331,18 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   ))
               .toList(),
         ),
+
+        // Route Polyline
+        if (_currentRoute.isNotEmpty)
+          PolylineLayer(
+            polylines: [
+              Polyline(
+                points: _currentRoute,
+                strokeWidth: 4.0,
+                color: AppColors.primary,
+              ),
+            ],
+          ),
 
         // Attribution
         const RichAttributionWidget(
