@@ -50,4 +50,14 @@ class SupabaseAuthDatasource {
         .update({'role': newRole})
         .eq('id', userId);
   }
+
+  Future<void> deleteUser(String userId) async {
+    // Al usar RPC llamamos a la función de Postgres que acabamos de crear
+    // que tiene permisos para borrar en auth.users
+    await _client.rpc('delete_user_by_admin', params: {
+      'target_user_id': userId,
+    });
+  }
 }
+
+

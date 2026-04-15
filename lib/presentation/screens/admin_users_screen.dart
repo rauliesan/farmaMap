@@ -56,18 +56,27 @@ class AdminUsersScreen extends ConsumerWidget {
               ),
               trailing: amIAdmin
                   ? const Text('(Tú)', style: TextStyle(color: Colors.grey))
-                  : Switch(
-                      value: user.isAdmin,
-                      activeTrackColor: AppColors.accent,
-                      onChanged: (val) async {
-                        try {
-                          await ref.read(authRepositoryProvider).updateRole(user.id, val ? 'admin' : 'user');
-                          ref.invalidate(adminUsersListProvider);
-                          if (context.mounted) context.showSnackBar('Rol actualizado');
-                        } catch (e) {
-                          if (context.mounted) context.showSnackBar('Error: $e', isError: true);
-                        }
-                      },
+                  : Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Switch(
+                          value: user.isAdmin,
+                          activeTrackColor: AppColors.accent,
+                          onChanged: (val) async {
+                            try {
+                              await ref.read(authRepositoryProvider).updateRole(user.id, val ? 'admin' : 'user');
+                              ref.invalidate(adminUsersListProvider);
+                              if (context.mounted) context.showSnackBar('Rol actualizado');
+                            } catch (e) {
+                              if (context.mounted) context.showSnackBar('Error: $e', isError: true);
+                            }
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent),
+                          onPressed: () => _confirmDelete(context, ref, user),
+                        ),
+                      ],
                     ),
             );
           },
@@ -77,4 +86,36 @@ class AdminUsersScreen extends ConsumerWidget {
       ),
     );
   }
+
+  Future<void> _confirmDelete(BuildContext context, WidgetRef ref, AppProfile user) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('¿Eliminar usuario?'),
+        content: Text('Esta acción eliminará el perfil de ${user.email}. Esta acción es irreversible (solo para el perfil de la app).'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('CANCELAR'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(backgroundColor: Colors.redAccent),
+            child: const Text('ELIMINAR'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await ref.read(authRepositoryProvider).deleteUser(user.id);
+        ref.invalidate(adminUsersListProvider);
+        if (context.mounted) context.showSnackBar('Usuario eliminado');
+      } catch (e) {
+        if (context.mounted) context.showSnackBar('Error al eliminar: $e', isError: true);
+      }
+    }
+  }
 }
+

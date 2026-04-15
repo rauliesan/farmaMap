@@ -12,4 +12,5 @@ abstract class AuthRepository {
   Future<AppProfile?> getProfile(String userId);
   Future<List<AppProfile>> getAllProfiles();
   Future<void> updateRole(String userId, String newRole);
+  Future<void> deleteUser(String userId);
 }

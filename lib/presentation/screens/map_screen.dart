@@ -241,6 +241,21 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         interactionOptions: const InteractionOptions(
           flags: InteractiveFlag.all,
         ),
+        onTap: (tapPosition, point) {
+          // Deseleccionar farmacia si se toca en una zona vacía del mapa
+          if (_selectedFarmacia != null) {
+            setState(() => _selectedFarmacia = null);
+          }
+        },
+        onLongPress: (tapPosition, point) {
+          if (ref.read(isAdminProvider)) {
+            AddFarmaciaBottomSheet.show(
+              context,
+              lat: point.latitude,
+              lng: point.longitude,
+            );
+          }
+        },
       ),
       children: [
         // OSM Tile Layer

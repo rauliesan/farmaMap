@@ -43,4 +43,9 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> updateRole(String userId, String newRole) {
     return _datasource.updateRole(userId, newRole);
   }
+
+  @override
+  Future<void> deleteUser(String userId) {
+    return _datasource.deleteUser(userId);
+  }
 }
