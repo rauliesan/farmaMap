@@ -88,4 +88,42 @@ class SupabaseFarmaciasDatasource {
 
     return response.count;
   }
+
+  /// Add a new pharmacy
+  Future<Farmacia> addFarmacia({
+    required String nombre,
+    required double lat,
+    required double lng,
+    required String direccion,
+    String? localidad,
+    String? codigoPostal,
+  }) async {
+    final response = await _client.from(SupabaseConstants.tableaFarmacias).insert({
+      'nombre': nombre,
+      'direccion': direccion,
+      'localidad': localidad,
+      'codigo_postal': codigoPostal,
+      'lat': lat,
+      'lng': lng,
+    }).select().single();
+
+    return Farmacia.fromJson(response);
+  }
+
+  /// Delete a pharmacy
+  Future<void> deleteFarmacia(int id) async {
+    await _client.from(SupabaseConstants.tableaFarmacias).delete().eq('id', id);
+  }
+
+  /// Update a pharmacy's name
+  Future<Farmacia> updateFarmacia(int id, {required String newNombre}) async {
+    final response = await _client
+        .from(SupabaseConstants.tableaFarmacias)
+        .update({'nombre': newNombre})
+        .eq('id', id)
+        .select()
+        .single();
+    
+    return Farmacia.fromJson(response);
+  }
 }

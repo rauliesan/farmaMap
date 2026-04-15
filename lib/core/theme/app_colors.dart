@@ -62,6 +62,10 @@ class AppColors {
   // Favorites
   static const Color favorite = Color(0xFFE91E63);
 
+  // Accent & Admin
+  static const Color accent = Color(0xFF2196F3);
+  static const Color adminGold = Color(0xFFFFC107);
+
   // Radius indicator
   static const Color radiusStroke = Color(0xFF00A86B);
   static const Color radiusFill = Color(0x1A00A86B);

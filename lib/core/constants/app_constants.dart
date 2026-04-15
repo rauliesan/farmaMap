@@ -46,7 +46,7 @@ class AppConstants {
 
   // ─── Navigation URLs ──────────────────────────────────────
   static String googleMapsDirectionsUrl(double lat, double lng) =>
-      'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng';
+      'https://www.google.com/maps/search/?api=1&query=$lat,$lng';
 
   static String appleMapsDirectionsUrl(double lat, double lng) =>
       'https://maps.apple.com/?daddr=$lat,$lng';

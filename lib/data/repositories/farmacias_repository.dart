@@ -21,4 +21,20 @@ abstract class FarmaciasRepository {
 
   /// Get total count of farmacias
   Future<int> getCount();
+
+  /// Admin or quick action to add a new farmacia
+  Future<Farmacia> addFarmacia({
+    required String nombre,
+    required double lat,
+    required double lng,
+    required String direccion,
+    String? localidad,
+    String? codigoPostal,
+  });
+
+  /// Delete a pharmacy
+  Future<void> deleteFarmacia(int id);
+
+  /// Update a pharmacy's name
+  Future<Farmacia> updateFarmacia(int id, {required String newNombre});
 }

@@ -10,8 +10,10 @@ import '../../core/extensions/context_extensions.dart';
 import '../../core/extensions/num_extensions.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/models/farmacia.dart';
+import '../providers/auth_provider.dart';
 import '../providers/farmacias_provider.dart';
 import '../providers/location_provider.dart';
+import '../widgets/add_farmacia_bottom_sheet.dart';
 import '../widgets/farmacia_bottom_sheet.dart';
 import '../widgets/loading_shimmer.dart';
 import '../widgets/pharmacy_marker.dart';
@@ -105,6 +107,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Auto-center the map exactly on the user when the location becomes available the first time
+    ref.listen<LocationState>(locationProvider, (previous, next) {
+      if ((previous == null || previous.position == null) && next.position != null) {
+        _mapController.move(next.position!, 15.0);
+      }
+    });
+
     final locationState = ref.watch(locationProvider);
     final farmaciasAsync = ref.watch(mapFarmaciasProvider);
     final selectedRadius = ref.watch(selectedRadiusProvider);
@@ -165,10 +174,33 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         ],
       ),
 
-      // FAB: center on user
+      // FAB: center on user & add pharmacy
       floatingActionButton: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          if (ref.watch(isAdminProvider))
+            FloatingActionButton(
+              heroTag: 'add_farmacia',
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              onPressed: () {
+                final userPos = ref.read(currentPositionProvider);
+                if (userPos != null) {
+                  AddFarmaciaBottomSheet.show(
+                    context,
+                    lat: userPos.latitude,
+                    lng: userPos.longitude,
+                  );
+                } else {
+                  context.showSnackBar(
+                    'Buscando ubicación actual...',
+                    isError: true,
+                  );
+                }
+              },
+              child: const Icon(Icons.add_location_alt_rounded),
+            ),
+          if (ref.watch(isAdminProvider)) const SizedBox(height: 12),
           FloatingActionButton.small(
             heroTag: 'center_location',
             onPressed: _centerOnUser,
@@ -233,7 +265,20 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             ],
           ),
 
-        // Pharmacy markers
+        // User location marker
+        if (userPosition != null)
+          MarkerLayer(
+            markers: [
+              Marker(
+                point: userPosition,
+                width: 72,
+                height: 72,
+                child: const UserLocationMarker(),
+              ),
+            ],
+          ),
+
+        // Pharmacy markers (drawn after user location so they are clickable)
         MarkerLayer(
           markers: farmacias
               .where((f) => f.hasValidCoordinates)
@@ -250,19 +295,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   ))
               .toList(),
         ),
-
-        // User location marker
-        if (userPosition != null)
-          MarkerLayer(
-            markers: [
-              Marker(
-                point: userPosition,
-                width: 72,
-                height: 72,
-                child: const UserLocationMarker(),
-              ),
-            ],
-          ),
 
         // Attribution
         const RichAttributionWidget(
@@ -353,7 +385,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             context.push('/list');
             break;
           case 2:
-            context.push('/favorites');
+            context.push('/profile');
             break;
         }
       },
@@ -369,9 +401,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           label: 'Lista',
         ),
         NavigationDestination(
-          icon: Icon(Icons.favorite_border_rounded),
-          selectedIcon: Icon(Icons.favorite_rounded),
-          label: 'Favoritos',
+          icon: Icon(Icons.person_outline_rounded),
+          selectedIcon: Icon(Icons.person_rounded),
+          label: 'Perfil',
         ),
       ],
     );

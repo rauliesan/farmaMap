@@ -13,8 +13,11 @@ import '../../core/extensions/context_extensions.dart';
 import '../../core/extensions/num_extensions.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/models/farmacia.dart';
+import '../providers/auth_provider.dart';
+import '../providers/farmacias_provider.dart';
 import '../providers/favorites_provider.dart';
 import '../providers/location_provider.dart';
+import '../widgets/edit_farmacia_bottom_sheet.dart';
 import '../widgets/pharmacy_marker.dart';
 
 /// Detail screen for a single pharmacy
@@ -38,8 +41,12 @@ class DetailScreen extends ConsumerWidget {
       );
     }
 
-    final f = farmacia!;
-    final isFav = ref.watch(isFavoriteProvider(f.id));
+    // Listen to the provider to get the most up-to-date data if it was edited
+    final farmaciasList = ref.watch(mapFarmaciasProvider).valueOrNull;
+    final f = farmaciasList?.firstWhere(
+      (element) => element.id == farmaciaId,
+      orElse: () => farmacia!,
+    ) ?? farmacia!;
     final userPos = ref.watch(currentPositionProvider);
 
     double? distance;
@@ -61,7 +68,8 @@ class DetailScreen extends ConsumerWidget {
             pinned: true,
             leading: _buildBackButton(context),
             actions: [
-              _buildFavoriteButton(context, ref, f, isFav),
+              if (ref.watch(isAdminProvider)) _buildEditButton(context, ref, f),
+              if (ref.watch(isAdminProvider)) _buildDeleteButton(context, ref, f),
             ],
             flexibleSpace: FlexibleSpaceBar(
               background: _buildMiniMap(f),
@@ -140,29 +148,70 @@ class DetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildFavoriteButton(
-    BuildContext context,
-    WidgetRef ref,
-    Farmacia f,
-    bool isFav,
-  ) {
+  Widget _buildEditButton(BuildContext context, WidgetRef ref, Farmacia f) {
     return Padding(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.only(top: 8, bottom: 8, right: 0),
       child: CircleAvatar(
         backgroundColor: context.colorScheme.surface.withValues(alpha: 0.9),
         child: IconButton(
-          icon: Icon(
-            isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-            size: 20,
-            color: isFav ? AppColors.favorite : null,
-          ),
-          onPressed: () {
-            ref.read(favoritesProvider.notifier).toggle(f.id);
-            context.showSnackBar(
-              isFav ? 'Eliminado de favoritos' : 'Añadido a favoritos',
-            );
-          },
+          icon: const Icon(Icons.edit_note_rounded, size: 20),
+          onPressed: () => EditFarmaciaBottomSheet.show(context, farmacia: f),
         ),
+      ),
+    );
+  }
+
+  Widget _buildDeleteButton(BuildContext context, WidgetRef ref, Farmacia f) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8, bottom: 8, right: 0),
+      child: CircleAvatar(
+        backgroundColor: context.colorScheme.surface.withValues(alpha: 0.9),
+        child: IconButton(
+          icon: Icon(Icons.delete_outline_rounded, size: 20, color: context.colorScheme.error),
+          onPressed: () => _confirmDelete(context, ref, f),
+        ),
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context, WidgetRef ref, Farmacia f) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Eliminar farmacia'),
+        content: Text('¿Seguro que quieres eliminar "${f.nombre}"? Esta acción no se puede deshacer.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              Navigator.pop(dialogContext); // close dialog
+              try {
+                await ref.read(farmaciasRepositoryProvider).deleteFarmacia(f.id);
+                // remove from favorites
+                ref.read(favoritesProvider.notifier).remove(f.id);
+                ref.invalidate(mapFarmaciasProvider);
+                ref.invalidate(allFarmaciasProvider);
+                
+                if (context.mounted) {
+                  Navigator.pop(context); // go back to wherever they came from
+                  context.showSnackBar('Farmacia eliminada permanentemente');
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  context.showSnackBar('Error al eliminar: $e', isError: true);
+                }
+              }
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: dialogContext.colorScheme.error,
+              foregroundColor: dialogContext.colorScheme.onError,
+            ),
+            child: const Text('Eliminar'),
+          ),
+        ],
       ),
     );
   }

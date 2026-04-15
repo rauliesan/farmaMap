@@ -3,7 +3,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../data/models/farmacia.dart';
 import '../../presentation/screens/detail_screen.dart';
-import '../../presentation/screens/favorites_screen.dart';
+import '../../presentation/screens/profile_screen.dart';
+import '../../presentation/screens/admin_users_screen.dart';
 import '../../presentation/screens/list_screen.dart';
 import '../../presentation/screens/map_screen.dart';
 import '../../presentation/screens/search_screen.dart';
@@ -70,14 +71,25 @@ class AppRouter {
         },
       ),
 
-      // Favorites Screen
+      // Profile Screen
       GoRoute(
-        path: '/favorites',
-        name: 'favorites',
+        path: '/profile',
+        name: 'profile',
         pageBuilder: (context, state) => CustomTransitionPage(
           key: state.pageKey,
-          child: const FavoritosScreen(),
+          child: const ProfileScreen(),
           transitionsBuilder: _slideUpTransition,
+        ),
+      ),
+
+      // Admin Users Screen
+      GoRoute(
+        path: '/admin_users',
+        name: 'adminUsers',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const AdminUsersScreen(),
+          transitionsBuilder: _slideTransition,
         ),
       ),
     ],

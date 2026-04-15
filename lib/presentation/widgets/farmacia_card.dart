@@ -82,19 +82,7 @@ class FarmaciaCard extends StatelessWidget {
                 ),
               ),
 
-              // Favorite button
-              if (onFavoriteToggle != null)
-                IconButton(
-                  onPressed: onFavoriteToggle,
-                  icon: Icon(
-                    isFavorite
-                        ? Icons.favorite_rounded
-                        : Icons.favorite_border_rounded,
-                    color: isFavorite ? AppColors.favorite : null,
-                    size: 22,
-                  ),
-                  visualDensity: VisualDensity.compact,
-                ),
+
 
               // Chevron
               Icon(

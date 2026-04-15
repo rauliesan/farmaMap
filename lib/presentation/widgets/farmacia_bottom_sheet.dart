@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/extensions/context_extensions.dart';
 import '../../core/extensions/num_extensions.dart';
@@ -7,7 +8,7 @@ import '../../core/theme/app_colors.dart';
 import '../../data/models/farmacia.dart';
 
 /// Bottom sheet shown when a pharmacy marker is tapped on the map
-class FarmaciaBottomSheet extends StatelessWidget {
+class FarmaciaBottomSheet extends ConsumerWidget {
   const FarmaciaBottomSheet({
     super.key,
     required this.farmacia,
@@ -42,7 +43,7 @@ class FarmaciaBottomSheet extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       decoration: BoxDecoration(
         color: context.colorScheme.surface,

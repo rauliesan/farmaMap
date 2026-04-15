@@ -158,12 +158,26 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       );
     }
 
-    // Results list
+    // Results list (Sorted by proximity)
+    var results = searchState.results.toList();
+    final userPos = ref.read(currentPositionProvider);
+    if (userPos != null) {
+      results.sort((a, b) {
+        final distA = NumExtensions.distanceBetween(
+          userPos.latitude, userPos.longitude, a.lat, a.lng,
+        );
+        final distB = NumExtensions.distanceBetween(
+          userPos.latitude, userPos.longitude, b.lat, b.lng,
+        );
+        return distA.compareTo(distB);
+      });
+    }
+
     return ListView.builder(
       padding: const EdgeInsets.only(top: 8, bottom: 80),
-      itemCount: searchState.results.length,
+      itemCount: results.length,
       itemBuilder: (context, index) {
-        final farmacia = searchState.results[index];
+        final farmacia = results[index];
         final distance = _distanceTo(farmacia);
 
         return _SearchResultItem(
